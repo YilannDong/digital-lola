@@ -1,0 +1,12 @@
+# dependencies (Electron binary is ~240MB — never commit)
+node_modules/
+
+# generated art proofs from tools/ (regenerate with the *.cjs harnesses)
+tools/*.png
+tools/preview.html
+
+# local editor / OS / Claude settings
+.claude/settings.local.json
+.DS_Store
+*.log
+npm-debug.log*

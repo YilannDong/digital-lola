@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pixll</title>
+    <link rel="stylesheet" href="builder.css" />
+  </head>
+  <body>
+    <div class="app app--solo">
+      <main class="hero">
+        <div class="brand">Pixll</div>
+        <div class="tagline">a little friend for your desktop</div>
+
+        <div id="preview" class="preview preview--lg"></div>
+
+        <input id="petName" class="pet-name" type="text" maxlength="16" placeholder="name your pet" />
+        <button id="bring" class="bring-btn">Bring to desktop →</button>
+        <p class="hint">She'll rest in a corner, remember where you left her,<br />say hello when clicked, and gently remind you when it's late.</p>
+      </main>
+    </div>
+
+    <script src="../shared/lola.js"></script>
+    <script src="../shared/lola-fill.js"></script>
+    <script src="../shared/pet-render.js"></script>
+    <script src="builder.js"></script>
+  </body>
+</html>
