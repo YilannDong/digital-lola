@@ -1,78 +1,92 @@
 <div align="center">
 
-# 🐶 Pixll — Lola, your desktop companion
+<img src="docs/lola.png" alt="Lola the corgi" width="440" />
 
-<img src="docs/lola.png" alt="Lola the corgi" width="420" />
+# 🐶 Pixll — meet Lola
 
-**A quiet little friend who rests in the corner of your screen — keeping you company, and gently nudging you when it's getting late.**
+### the little corgi who lives in the corner of your screen
+
+*Not a game. Not a chatbot. Just calm company while you work —*
+*and a gentle nudge when it's getting late.* 🌙
+
+<br/>
+
+![Electron](https://img.shields.io/badge/Electron-2B2E3A?logo=electron&logoColor=9FEAF9)
+![Platform](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white)
+![No build step](https://img.shields.io/badge/build%20step-none-brightgreen)
+![License: MIT](https://img.shields.io/badge/License-MIT-f4d64e)
 
 </div>
 
 ---
 
-Pixll is a tiny [Electron](https://www.electronjs.org/) desktop pet. The character, **Lola**, is a frameless, transparent, always-on-top window that sits wherever you leave her. She isn't a game or a busy animation — she's calm company that reacts when you say hello.
+## 👋 Say hi to Lola
 
-## Features
+Lola is a **frameless, transparent, always-on-top** desktop pet. She sits wherever you leave her, breathes softly, and reacts when you say hello. No windows, no clutter — just a friend in the corner.
 
-- 🖼️ **Transparent, frameless, always-on-top** — Lola floats over your desktop with no window chrome.
-- 🖱️ **Drag to move & she remembers** — put her anywhere; she returns to that spot next time.
-- 👋 **Click to say hi** — a gentle bounce and a warm one-line message.
-- 🌙 **Gentle reminders** — occasional low-key nudges (water, stretch, and a wind-down reminder late at night). Never naggy, never a system popup.
-- 🐶 **Menu-bar control** — a one-click icon in the macOS menu bar to show/hide her; clicking the Dock icon brings her back too.
-- ✖️ **Put her away anytime** — the × on the pet (or right-click → Put away) tucks her into the menu bar; she's one click from returning.
+<div align="center">
+<img src="docs/lola.png" alt="Lola" width="240" />
+</div>
 
-## Screenshots
+## ✨ What she does
 
-| On your desktop | The menu-bar & controls |
-| --- | --- |
-| <img src="docs/lola.png" width="320" /> | Left-click the **🐶** in the menu bar to show/hide Lola. Right-click for Rename, reminders on/off, and Quit. |
+| | |
+|---|---|
+| 🖼️ **Floats on your desktop** | Transparent, borderless, always on top — only Lola shows, nothing else. |
+| 🖱️ **Drag her anywhere** | Move her to your favorite corner — she remembers the spot next time. |
+| 👋 **Click to say hi** | A little bounce and a warm one-liner. |
+| 🌙 **Gentle reminders** | Low-key nudges to sip water, stretch, and wind down late at night — never a naggy system popup. |
+| 🐶 **One-click menu-bar toggle** | Tuck her away with the **×**, bring her back from the **🐶** in your menu bar (or the Dock icon). |
 
-## Run it
+## 🚀 Get Lola running
 
-Requires [Node.js](https://nodejs.org/) (LTS). From the project root:
+You'll need [Node.js](https://nodejs.org/) (LTS). Then:
 
 ```bash
-npm install      # installs Electron
-npm start        # launches Pixll
+git clone https://github.com/YilannDong/digital-lola.git
+cd digital-lola
+npm install     # grabs Electron
+npm start       # 🐶 Lola appears!
 ```
 
-On first launch you'll see a small "Bring to desktop" screen — name her and send her to the corner. After that she comes straight back each time.
+On first launch, name her and hit **"Bring to desktop."** After that she comes right back every time — and lives quietly in your menu bar.
 
-## How it's built
+## 🎨 Make her your own
 
-Everything is plain HTML/CSS/JS in the Electron renderer — no build step, no framework.
+Lola is just an SVG — swap in *any* character:
+
+```bash
+# 1. drop your artwork at ~/Downloads/lola.svg
+node tools/embed-lola.cjs   # bake it into the app
+node tools/make-fill.cjs    # tidy up any transparent gaps
+npm start                   # meet your new friend
+```
+
+> 💡 A **layered** SVG (ears, tail, etc. as separate groups) unlocks richer per-part animation down the road.
+
+## 🧩 Under the hood
+
+Plain HTML/CSS/JS in Electron — **no framework, no build step.**
 
 ```
 src/
-  main.js              Electron main: windows, tray, persistence, reminders
-  preload.js           safe IPC bridge (contextBridge)
-  renderer/
-    builder.html/.js/.css   the "name her & place her" screen
-    pet.html/.js/.css       the floating pet: drag, click, bubble, close
-  shared/
-    lola.js            Lola's artwork (an SVG), embedded verbatim
-    lola-fill.js       a white backing that fills enclosed gaps in the trace
-    pet-render.js       composes the artwork for rendering
-    messages.js         the gentle one-liners she says
-tools/                 offscreen render/proofing scripts (Electron headless)
-docs/                  images for this README
+├─ main.js            windows · menu-bar tray · saving · reminders
+├─ preload.js         safe IPC bridge
+├─ renderer/
+│  ├─ pet.*           the floating pet: drag · click · bubble · close
+│  └─ builder.*       the "name & place her" screen
+└─ shared/
+   ├─ lola.js         Lola's artwork (embedded SVG)
+   ├─ lola-fill.js    white backing that fills gaps in the trace
+   ├─ pet-render.js   composes the artwork
+   └─ messages.js     the gentle things she says
 ```
 
-The pet is drawn from a single SVG, rendered with a **transparent background** so nothing but Lola shows on your desktop.
+## 💛 License
 
-## Swap in your own character
+[MIT](LICENSE) © 2026 Yilan Dong — go make your own desktop friend.
 
-Lola is just an SVG. To use a different character:
-
-1. Drop your artwork at `~/Downloads/lola.svg`.
-2. Regenerate the embedded asset and hole-fill backing:
-   ```bash
-   node tools/embed-lola.cjs   # bakes the SVG into src/shared/lola.js
-   node tools/make-fill.cjs    # fills any enclosed transparent gaps
-   ```
-
-A **layered** SVG (parts as separate groups) also opens the door to richer per-part animation.
-
-## License
-
-[MIT](LICENSE) © 2026 Yilan Dong
+<div align="center">
+<br/>
+<sub>Built with Electron · a tiny bit of magic · and one very good dog.</sub>
+</div>
