@@ -51,18 +51,21 @@ npm start       # 🐶 Lola appears!
 
 On first launch, name her and hit **"Bring to desktop."** After that she comes right back every time — and lives quietly in your menu bar.
 
-## 🎨 Make her your own
+## 🎨 Build your own pet
 
-Lola is just an SVG — swap in *any* character:
+Open the builder and **design a pet from parts** — the Uchinoko-Maker way. Pick the animal, coat colour, ears, eyes, muzzle, tail and an accessory, and the preview updates live. Hit **Bring to desktop** and *your* pet moves in.
 
-```bash
-# 1. drop your artwork at ~/Downloads/lola.svg
-node tools/embed-lola.cjs   # bake it into the app
-node tools/make-fill.cjs    # tidy up any transparent gaps
-npm start                   # meet your new friend
+Every pet is just a tiny **"DNA"** object:
+
+```js
+{ species: "dog", coat: "#e8a05c", patch: "#fff3e2",
+  ears: "perky", eyes: "round", muzzle: "short",
+  tail: "curl", accessory: "collar", accent: "#f2a65a", blush: true }
 ```
 
-> 💡 A **layered** SVG (ears, tail, etc. as separate groups) unlocks richer per-part animation down the road.
+The parametric engine (`shared/pet-kit.js`) turns that DNA into a layered SVG — so parts swap and colours recolour with zero new art. Add an option in the engine and it shows up in the builder automatically. This is the foundation the customization platform is built on (see [`docs/ROADMAP.md`](docs/ROADMAP.md)).
+
+> 💛 Prefer the original hand-drawn corgi? Leave the DNA empty and Lola shows up as the fallback.
 
 ## 🧩 Under the hood
 
@@ -74,11 +77,12 @@ src/
 ├─ preload.js         safe IPC bridge
 ├─ renderer/
 │  ├─ pet.*           the floating pet: drag · click · bubble · close
-│  └─ builder.*       the "name & place her" screen
+│  └─ builder.*       the live pet customizer (parts + colours)
 └─ shared/
-   ├─ lola.js         Lola's artwork (embedded SVG)
+   ├─ pet-kit.js      ⭐ parametric engine: pet DNA → layered SVG
+   ├─ pet-render.js   render seam: DNA → pet-kit, else legacy Lola
+   ├─ lola.js         Lola's original artwork (fallback SVG)
    ├─ lola-fill.js    white backing that fills gaps in the trace
-   ├─ pet-render.js   composes the artwork
    └─ messages.js     the gentle things she says
 ```
 

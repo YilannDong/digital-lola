@@ -200,3 +200,42 @@ body {
   cursor: pointer;
   padding: 2px;
 }
+.colors { margin-top: 12px; }
+
+/* ---- pill toggles (ears, eyes, tail, …) ---- */
+.pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill {
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, transform 0.08s;
+}
+.pill:hover { transform: translateY(-1px); }
+.pill.selected {
+  border-color: var(--sel);
+  background: #fdeeda;
+  color: var(--accent-ink);
+}
+.pill.toggle { width: 100%; text-align: center; }
+
+/* ---- accent colour dots ---- */
+.dots { display: flex; flex-wrap: wrap; gap: 10px; }
+.dot {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1.5px var(--line);
+  cursor: pointer;
+  transition: transform 0.08s;
+}
+.dot:hover { transform: scale(1.08); }
+.dot.selected { box-shadow: 0 0 0 3px var(--sel); }
+
+/* coat palette chip = two colour halves */
+.palette span { display: block; }

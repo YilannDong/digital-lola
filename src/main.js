@@ -12,7 +12,9 @@ let CONFIG_PATH = null; // set once app is ready (needs app.getPath)
 function defaultStore() {
   return {
     onboarded: false,
-    pet: { name: "Pixll" },
+    // pet.dna is the customizable "genome" (see shared/pet-kit.js). null = the
+    // legacy Lola artwork; any DNA object switches to the parametric pet.
+    pet: { name: "Pixll", dna: null },
     petPosition: null, // {x, y} of the pet window; null = bottom-right corner
     settings: { remindersEnabled: true, reminderIntervalMin: 45 },
   };

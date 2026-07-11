@@ -3,25 +3,33 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pixll</title>
+    <title>Pixll — make your pet</title>
     <link rel="stylesheet" href="builder.css" />
   </head>
   <body>
-    <div class="app app--solo">
-      <main class="hero">
-        <div class="brand">Pixll</div>
-        <div class="tagline">a little friend for your desktop</div>
+    <div class="app">
+      <!-- left: live preview -->
+      <section class="stage">
+        <div class="stage-inner">
+          <div class="brand">Pixll</div>
+          <div class="tagline">design a little friend, then bring it to your desktop</div>
 
-        <div id="preview" class="preview preview--lg"></div>
+          <div id="preview" class="preview"></div>
 
-        <input id="petName" class="pet-name" type="text" maxlength="16" placeholder="name your pet" />
-        <button id="bring" class="bring-btn">Bring to desktop →</button>
-        <p class="hint">She'll rest in a corner, remember where you left her,<br />say hello when clicked, and gently remind you when it's late.</p>
-      </main>
+          <input id="petName" class="pet-name" type="text" maxlength="16" placeholder="name your pet" />
+          <button id="bring" class="bring-btn">Bring to desktop →</button>
+          <button id="randomize" class="ghost-btn">🎲 Surprise me</button>
+          <p class="hint">Adjust the parts on the right — your pet updates live.</p>
+        </div>
+      </section>
+
+      <!-- right: customization controls -->
+      <section class="panel" id="panel"></section>
     </div>
 
     <script src="../shared/lola.js"></script>
     <script src="../shared/lola-fill.js"></script>
+    <script src="../shared/pet-kit.js"></script>
     <script src="../shared/pet-render.js"></script>
     <script src="builder.js"></script>
   </body>

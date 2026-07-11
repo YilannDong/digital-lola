@@ -20,9 +20,9 @@ closeBtn.addEventListener("click", (e) => {
 let cfg = { name: "Pixll" };
 let settings = { remindersEnabled: true, reminderIntervalMin: 45 };
 
-// Render the plain (pixel-perfect) art.
+// Render the pet from its config (custom DNA → parametric kit; else Lola).
 function render() {
-  petEl.innerHTML = R.renderSVG();
+  petEl.innerHTML = R.renderSVG(cfg);
 }
 
 // ---- speech bubble --------------------------------------------------------

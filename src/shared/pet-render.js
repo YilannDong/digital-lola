@@ -1,18 +1,21 @@
 /*
- * Pixll — pet renderer.
- * Character is "Lola" (lola.js), the user's exact source SVG embedded verbatim.
- * lola-fill.js paints a white backing under the art to fill the trace's enclosed
- * holes (front legs). The tail-wag was removed — a flat un-grouped bitmap trace
- * can't cleanly detach the tail (see memory for the full recipe if a LAYERED
- * source SVG ever becomes available). renderSVG() returns the static art.
+ * Pixll — pet renderer (the single seam every surface renders through).
  *
- * Background is transparent.
+ * Two kinds of pet can be drawn:
+ *   1. A CUSTOM pet — described by a "DNA" object (pet.dna) and drawn by the
+ *      parametric pet-kit engine. This is the customizable path the platform
+ *      is built on (builder → desktop → later, web + cloud sync).
+ *   2. LEGACY Lola — the original hand-embedded VTracer SVG (lola.js). Kept as
+ *      the fallback so existing installs with no DNA still show the corgi.
+ *
+ * renderSVG(petConfig) picks the path from the config it's handed.
  */
 (function (root) {
   const Lola = root.PixllLola || (typeof require !== "undefined" ? require("./lola.js") : null);
   const Fill = root.PixllLolaFill || (typeof require !== "undefined" ? require("./lola-fill.js") : null);
+  const Kit = root.PixllKit || (typeof require !== "undefined" ? require("./pet-kit.js") : null);
 
-  function renderSVG(_config) {
+  function renderLola() {
     if (!Lola) return "";
     let svg = Lola.svg;
     if (Fill && Fill.dataUrl) {
@@ -22,7 +25,15 @@
     return svg;
   }
 
-  const api = { renderSVG };
+  // petConfig may be the whole pet object ({ name, dna }) or a bare DNA object.
+  function renderSVG(petConfig) {
+    const cfg = petConfig || {};
+    const dna = cfg.dna || (cfg.species || cfg.coat ? cfg : null);
+    if (dna && Kit) return Kit.renderSVG(dna);
+    return renderLola();
+  }
+
+  const api = { renderSVG, renderLola };
   root.PixllPet = api;
   if (typeof module !== "undefined" && module.exports) module.exports = api;
 })(typeof window !== "undefined" ? window : globalThis);
