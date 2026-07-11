@@ -1,33 +1,27 @@
 /*
- * Pixll — pet-kit: the "genome → art" engine.
+ * Pixll — pet-kit: the "genome → art" engine (soft / fluffy style).
  *
  * A pet is described by a tiny JSON "DNA" object. This module turns that DNA
- * into a layered, front-facing SVG built from simple procedural shapes — so
- * every part (ears, eyes, muzzle, tail, accessory) is swappable and every
- * colour is recolourable. This is the Uchinoko-Maker-style customization core:
- * the same DNA that drives the live builder preview also drives the desktop
- * pet, and (later) the web customizer + cloud sync.
+ * into a layered SVG built from procedural shapes with SOFT SHADING — radial
+ * gradients for volume, scalloped "fur" outlines, and big glossy eyes — aiming
+ * for the plush, cuddly Uchinoko-Maker look while staying pure code (no image
+ * assets, no build step). Every part is swappable and every colour recolourable.
  *
- * DNA schema (all fields optional; defaults below):
- *   {
- *     species:   "dog" | "cat" | "bunny",
- *     coat:      "#e8a05c",   // main fur colour
- *     patch:     "#fff3e2",   // belly / muzzle / blaze colour
- *     ears:      "perky" | "folded" | "floppy",
- *     eyes:      "round" | "sleepy" | "sparkle",
- *     muzzle:    "short" | "long",
- *     tail:      "curl" | "fluffy" | "stub",
- *     accessory: "none" | "collar" | "scarf" | "bow",
- *     accent:    "#f2a65a",   // accessory colour
- *     blush:     true
- *   }
- *
- * There is NO build step — plain shared module for both browser and Node.
+ * DNA schema (all optional; defaults below):
+ *   species  : "dog" | "cat" | "bunny"
+ *   coat     : "#e8a05c"   main fur colour
+ *   patch    : "#fff3e2"   belly / muzzle / blaze colour
+ *   ears     : "perky" | "folded" | "floppy"
+ *   eyes     : "round" | "sleepy" | "sparkle"
+ *   muzzle   : "short" | "long"
+ *   tail     : "curl" | "fluffy" | "stub"
+ *   accessory: "none" | "collar" | "scarf" | "bow"
+ *   accent   : "#f2a65a"   accessory colour
+ *   blush    : true
  */
 (function (root) {
   "use strict";
 
-  // ---- option catalogues (the "parts bin" the customizer reads from) -------
   const OPTIONS = {
     species: ["dog", "cat", "bunny"],
     ears: ["perky", "folded", "floppy"],
@@ -38,23 +32,23 @@
   };
 
   const COAT_PALETTE = [
-    { name: "Corgi", coat: "#e8a05c", patch: "#fff3e2" },
-    { name: "Cream", coat: "#f0d9b8", patch: "#fffaf2" },
-    { name: "Charcoal", coat: "#6b6560", patch: "#e7e0d7" },
-    { name: "Cocoa", coat: "#8a5a3b", patch: "#f3e4d3" },
-    { name: "Rosé", coat: "#e0a3a0", patch: "#fff0ee" },
-    { name: "Mint", coat: "#8fc6ac", patch: "#f0fbf5" },
-    { name: "Slate", coat: "#8aa0c0", patch: "#eef3fb" },
-    { name: "Ink", coat: "#3f3a44", patch: "#d9d3de" },
+    { name: "Corgi", coat: "#efa863", patch: "#fff6ea" },
+    { name: "Cream", coat: "#f2ddbe", patch: "#fffbf4" },
+    { name: "Ash", coat: "#8f8880", patch: "#efe9e1" },
+    { name: "Cocoa", coat: "#9a6644", patch: "#f6e8d8" },
+    { name: "Rosé", coat: "#e6aead", patch: "#fff2f0" },
+    { name: "Mint", coat: "#9bd0b8", patch: "#f2fcf6" },
+    { name: "Sky", coat: "#9db6d6", patch: "#f0f5fc" },
+    { name: "Ink", coat: "#4a444f", patch: "#ddd7e0" },
   ];
 
-  const ACCENT_PALETTE = ["#f2a65a", "#e06f6f", "#6fa8e0", "#7bc47f", "#b98fe0", "#f4c542"];
+  const ACCENT_PALETTE = ["#f2a65a", "#e77b7b", "#6fa8e0", "#7bc47f", "#b98fe0", "#f4c542"];
 
   function defaults() {
     return {
       species: "dog",
-      coat: "#e8a05c",
-      patch: "#fff3e2",
+      coat: "#efa863",
+      patch: "#fff6ea",
       ears: "perky",
       eyes: "round",
       muzzle: "short",
@@ -65,9 +59,7 @@
     };
   }
 
-  function normalize(dna) {
-    return Object.assign(defaults(), dna || {});
-  }
+  function normalize(dna) { return Object.assign(defaults(), dna || {}); }
 
   // ---- colour helpers ------------------------------------------------------
   function clamp(n) { return Math.max(0, Math.min(255, n)); }
@@ -79,169 +71,172 @@
   function rgbToHex(r, g, b) {
     return "#" + [r, g, b].map((n) => clamp(Math.round(n)).toString(16).padStart(2, "0")).join("");
   }
-  // shade < 0 darkens, > 0 lightens (fraction toward black/white)
   function shade(hex, amt) {
     const [r, g, b] = hexToRgb(hex);
-    if (amt < 0) {
-      const k = 1 + amt;
-      return rgbToHex(r * k, g * k, b * k);
-    }
+    if (amt < 0) { const k = 1 + amt; return rgbToHex(r * k, g * k, b * k); }
     return rgbToHex(r + (255 - r) * amt, g + (255 - g) * amt, b + (255 - b) * amt);
   }
 
-  // ---- part builders -------------------------------------------------------
-  // Canvas is a 200 x 210 viewBox, pet centred on x = 100.
+  // ---- fluffy shape helper -------------------------------------------------
+  // A closed scalloped "cloud" path — the fur silhouette. Deterministic so the
+  // pet never shimmers between renders.
+  function fluff(cx, cy, rx, ry, bumps, amp) {
+    let d = "";
+    const step = (Math.PI * 2) / bumps;
+    for (let i = 0; i < bumps; i++) {
+      const a0 = i * step, a1 = (i + 1) * step, mid = (a0 + a1) / 2;
+      const x0 = cx + Math.cos(a0) * rx, y0 = cy + Math.sin(a0) * ry;
+      const x1 = cx + Math.cos(a1) * rx, y1 = cy + Math.sin(a1) * ry;
+      const px = cx + Math.cos(mid) * (rx + amp), py = cy + Math.sin(mid) * (ry + amp);
+      d += (i === 0 ? `M${x0.toFixed(1)} ${y0.toFixed(1)}` : "") + ` Q${px.toFixed(1)} ${py.toFixed(1)} ${x1.toFixed(1)} ${y1.toFixed(1)}`;
+    }
+    return d + "Z";
+  }
 
-  function earsSVG(dna, c) {
-    const dark = shade(c, -0.18);
-    const inner = dna.species === "cat" ? shade(dna.patch, -0.04) : shade(c, 0.32);
+  // unique gradient ids per render (so multiple pets on one page don't collide)
+  let uid = 0;
+
+  // ---- parts ---------------------------------------------------------------
+  function earsSVG(dna, g) {
+    const c = `url(#${g}-coat)`;
+    const inner = dna.species === "cat" ? shade(dna.patch, -0.02) : shade(dna.coat, 0.3);
+    const edge = shade(dna.coat, -0.16);
     if (dna.species === "bunny") {
-      // tall upright ears
       return `
         <g>
-          <ellipse cx="80" cy="26" rx="12" ry="34" fill="${c}" transform="rotate(-8 80 26)"/>
-          <ellipse cx="120" cy="26" rx="12" ry="34" fill="${c}" transform="rotate(8 120 26)"/>
-          <ellipse cx="80" cy="30" rx="6" ry="24" fill="${inner}" transform="rotate(-8 80 30)"/>
-          <ellipse cx="120" cy="30" rx="6" ry="24" fill="${inner}" transform="rotate(8 120 30)"/>
+          <path d="${fluff(80, 24, 12, 32, 9, 2)}" fill="${c}" transform="rotate(-9 80 40)"/>
+          <path d="${fluff(120, 24, 12, 32, 9, 2)}" fill="${c}" transform="rotate(9 120 40)"/>
+          <ellipse cx="80" cy="30" rx="6" ry="22" fill="${inner}" transform="rotate(-9 80 40)"/>
+          <ellipse cx="120" cy="30" rx="6" ry="22" fill="${inner}" transform="rotate(9 120 40)"/>
         </g>`;
     }
     if (dna.species === "cat" || dna.ears === "perky") {
-      // upright triangles
       return `
         <g>
-          <path d="M62 60 L58 20 L92 46 Z" fill="${c}"/>
-          <path d="M138 60 L142 20 L108 46 Z" fill="${c}"/>
-          <path d="M66 54 L64 32 L84 47 Z" fill="${inner}"/>
-          <path d="M134 54 L136 32 L116 47 Z" fill="${inner}"/>
+          <path d="M58 62 Q54 22 92 48 Q80 60 58 62 Z" fill="${c}"/>
+          <path d="M142 62 Q146 22 108 48 Q120 60 142 62 Z" fill="${c}"/>
+          <path d="M66 55 Q64 34 84 49 Q76 55 66 55 Z" fill="${inner}"/>
+          <path d="M134 55 Q136 34 116 49 Q124 55 134 55 Z" fill="${inner}"/>
         </g>`;
     }
     if (dna.ears === "folded") {
-      // small folded-over flaps
       return `
         <g>
-          <path d="M60 46 q-14 -6 -18 10 q10 10 22 4 Z" fill="${dark}"/>
-          <path d="M140 46 q14 -6 18 10 q-10 10 -22 4 Z" fill="${dark}"/>
+          <path d="${fluff(52, 52, 15, 13, 7, 2)}" fill="${edge}"/>
+          <path d="${fluff(148, 52, 15, 13, 7, 2)}" fill="${edge}"/>
         </g>`;
     }
-    // floppy — long hanging ears
+    // floppy — long fluffy hanging ears
     return `
       <g>
-        <path d="M64 52 q-26 2 -24 40 q2 20 22 16 q6 -30 8 -52 Z" fill="${dark}"/>
-        <path d="M136 52 q26 2 24 40 q-2 20 -22 16 q-6 -30 -8 -52 Z" fill="${dark}"/>
+        <path d="${fluff(58, 96, 17, 34, 9, 2.5)}" fill="${edge}"/>
+        <path d="${fluff(142, 96, 17, 34, 9, 2.5)}" fill="${edge}"/>
       </g>`;
   }
 
-  function tailSVG(dna, c) {
-    const dark = shade(c, -0.12);
-    if (dna.tail === "fluffy") {
-      return `<ellipse cx="150" cy="150" rx="20" ry="24" fill="${dark}"/>`;
-    }
-    if (dna.tail === "stub") {
-      return `<circle cx="146" cy="156" r="11" fill="${dark}"/>`;
-    }
-    // curl
-    return `<path d="M140 150 q34 -6 30 -34 q-2 -16 -18 -14 q14 4 12 18 q-2 18 -26 18 Z" fill="${dark}"/>`;
+  function tailSVG(dna, g) {
+    const c = `url(#${g}-coat)`;
+    if (dna.tail === "fluffy") return `<path d="${fluff(152, 150, 18, 22, 9, 3)}" fill="${c}"/>`;
+    if (dna.tail === "stub") return `<path d="${fluff(148, 156, 11, 11, 7, 2)}" fill="${c}"/>`;
+    return `<path d="M138 150 q36 -4 32 -34 q-3 -18 -20 -14 q15 5 13 19 q-3 20 -28 19 Z" fill="${c}"/>`;
   }
 
-  function headSVG(dna, c) {
-    // rounded head
-    return `<ellipse cx="100" cy="74" rx="50" ry="46" fill="${c}"/>`;
-  }
-
-  function bodySVG(dna, c) {
-    const patch = dna.patch;
+  function bodySVG(dna, g) {
+    const c = `url(#${g}-coat)`;
+    const patch = `url(#${g}-patch)`;
+    const foot = shade(dna.coat, -0.06);
     return `
       <g>
-        <path d="M62 118 q-6 44 12 66 q26 14 52 0 q18 -22 12 -66 Z" fill="${c}"/>
-        <ellipse cx="100" cy="164" rx="22" ry="30" fill="${patch}"/>
-        <ellipse cx="78" cy="190" rx="13" ry="10" fill="${shade(c, 0.05)}"/>
-        <ellipse cx="122" cy="190" rx="13" ry="10" fill="${shade(c, 0.05)}"/>
+        <path d="${fluff(100, 158, 44, 40, 13, 3)}" fill="${c}"/>
+        <path d="${fluff(100, 168, 22, 26, 10, 2)}" fill="${patch}"/>
+        <ellipse cx="78" cy="192" rx="13" ry="10" fill="${foot}"/>
+        <ellipse cx="122" cy="192" rx="13" ry="10" fill="${foot}"/>
       </g>`;
   }
 
-  function muzzleSVG(dna) {
-    const p = dna.patch;
-    const noseDark = shade(dna.coat, -0.55);
+  function headSVG(dna, g) {
+    // soft ambient shadow where the head sits on the body, then the fluffy head
+    return `
+      <ellipse cx="100" cy="120" rx="40" ry="14" fill="#000" opacity="0.06"/>
+      <path d="${fluff(100, 76, 50, 47, 15, 3)}" fill="url(#${g}-coat)"/>`;
+  }
+
+  function muzzleSVG(dna, g) {
+    const patch = `url(#${g}-patch)`;
+    const nose = shade(dna.coat, -0.5);
     const long = dna.muzzle === "long";
-    const my = long ? 96 : 90;
-    const mrx = long ? 24 : 27;
-    const mry = long ? 22 : 17;
-    // blaze up the forehead (classic corgi/uchinoko marking)
-    const blaze = `<path d="M100 40 q-9 24 -3 46 q3 6 6 0 q6 -22 -3 -46 Z" fill="${p}" opacity="0.9"/>`;
+    const my = long ? 100 : 94;
+    const mrx = long ? 25 : 28, mry = long ? 22 : 18;
+    const ny = my - 10;
+    const blaze = `<path d="M100 42 Q90 66 96 92 Q100 98 104 92 Q110 66 100 42 Z" fill="${patch}" opacity="0.95"/>`;
     return `
       <g>
         ${blaze}
-        <ellipse cx="100" cy="${my}" rx="${mrx}" ry="${mry}" fill="${p}"/>
-        <ellipse cx="100" cy="${my - 8}" rx="7" ry="5" fill="${noseDark}"/>
-        <path d="M100 ${my - 3} q-7 12 -14 4" fill="none" stroke="${noseDark}" stroke-width="2.4" stroke-linecap="round"/>
-        <path d="M100 ${my - 3} q7 12 14 4" fill="none" stroke="${noseDark}" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="${fluff(100, my, mrx, mry, 11, 2)}" fill="${patch}"/>
+        <path d="M${100 - 7} ${ny} Q100 ${ny - 4} ${100 + 7} ${ny} Q100 ${ny + 8} ${100 - 7} ${ny} Z" fill="${nose}"/>
+        <ellipse cx="98" cy="${ny - 1.5}" rx="2.4" ry="1.5" fill="#fff" opacity="0.5"/>
+        <path d="M100 ${ny + 6} q-8 11 -15 3" fill="none" stroke="${nose}" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M100 ${ny + 6} q8 11 15 3" fill="none" stroke="${nose}" stroke-width="2.4" stroke-linecap="round"/>
       </g>`;
   }
 
-  function eyesSVG(dna) {
-    const dark = "#3a3230";
-    const catchlight = "#ffffff";
-    const lx = 82, rx = 118, ey = 72;
+  function eyeGlossy(cx, cy, g) {
+    return `
+      <ellipse cx="${cx}" cy="${cy}" rx="9.5" ry="12" fill="url(#${g}-eye)"/>
+      <ellipse cx="${cx - 3}" cy="${cy - 4.5}" rx="3.4" ry="4.4" fill="#fff" opacity="0.95"/>
+      <circle cx="${cx + 3.4}" cy="${cy + 3.4}" r="1.9" fill="#fff" opacity="0.85"/>`;
+  }
+
+  function eyesSVG(dna, g) {
+    const dark = "#3a2c26";
+    const lx = 81, rx = 119, ey = 74;
     if (dna.eyes === "sleepy") {
       return `
-        <g stroke="${dark}" stroke-width="3.4" stroke-linecap="round" fill="none">
-          <path d="M${lx - 8} ${ey} q8 7 16 0"/>
-          <path d="M${rx - 8} ${ey} q8 7 16 0"/>
-        </g>`;
+        <g stroke="${dark}" stroke-width="3.6" stroke-linecap="round" fill="none">
+          <path d="M${lx - 9} ${ey} q9 8 18 0"/>
+          <path d="M${rx - 9} ${ey} q9 8 18 0"/>
+        </g>
+        <g fill="#f6a5a5" opacity="0.5"><ellipse cx="${lx}" cy="${ey + 8}" rx="6" ry="3.4"/><ellipse cx="${rx}" cy="${ey + 8}" rx="6" ry="3.4"/></g>`;
     }
     if (dna.eyes === "sparkle") {
       return `
-        <g fill="${dark}">
-          <circle cx="${lx}" cy="${ey}" r="8"/>
-          <circle cx="${rx}" cy="${ey}" r="8"/>
-          <circle cx="${lx + 3}" cy="${ey - 3}" r="2.6" fill="${catchlight}"/>
-          <circle cx="${rx + 3}" cy="${ey - 3}" r="2.6" fill="${catchlight}"/>
-          <circle cx="${lx - 2.5}" cy="${ey + 2.5}" r="1.3" fill="${catchlight}"/>
-          <circle cx="${rx - 2.5}" cy="${ey + 2.5}" r="1.3" fill="${catchlight}"/>
+        ${eyeGlossy(lx, ey, g)}
+        ${eyeGlossy(rx, ey, g)}
+        <g fill="#fff" opacity="0.9">
+          <circle cx="${lx - 1}" cy="${ey + 6}" r="1.2"/>
+          <circle cx="${rx - 1}" cy="${ey + 6}" r="1.2"/>
         </g>`;
     }
-    // round
-    return `
-      <g fill="${dark}">
-        <circle cx="${lx}" cy="${ey}" r="7"/>
-        <circle cx="${rx}" cy="${ey}" r="7"/>
-        <circle cx="${lx + 2.5}" cy="${ey - 2.5}" r="2.2" fill="${catchlight}"/>
-        <circle cx="${rx + 2.5}" cy="${ey - 2.5}" r="2.2" fill="${catchlight}"/>
-      </g>`;
+    return `${eyeGlossy(lx, ey, g)}${eyeGlossy(rx, ey, g)}`;
   }
 
   function blushSVG(dna) {
     if (!dna.blush) return "";
-    return `
-      <g fill="#f6a5a5" opacity="0.55">
-        <ellipse cx="66" cy="86" rx="8" ry="5"/>
-        <ellipse cx="134" cy="86" rx="8" ry="5"/>
-      </g>`;
+    return `<g fill="#f79aa0" opacity="0.5"><ellipse cx="64" cy="90" rx="9" ry="5.5"/><ellipse cx="136" cy="90" rx="9" ry="5.5"/></g>`;
   }
 
   function accessorySVG(dna) {
-    const a = dna.accent;
-    const dark = shade(a, -0.2);
+    const a = dna.accent, dark = shade(a, -0.2), lite = shade(a, 0.4);
     if (dna.accessory === "collar") {
       return `
         <g>
-          <path d="M70 116 q30 16 60 0" fill="none" stroke="${a}" stroke-width="8" stroke-linecap="round"/>
-          <circle cx="100" cy="123" r="5" fill="${shade(a, 0.4)}" stroke="${dark}" stroke-width="1.5"/>
+          <path d="M68 118 Q100 138 132 118" fill="none" stroke="${a}" stroke-width="9" stroke-linecap="round"/>
+          <circle cx="100" cy="128" r="5.5" fill="${lite}" stroke="${dark}" stroke-width="1.5"/>
         </g>`;
     }
     if (dna.accessory === "scarf") {
       return `
         <g>
-          <path d="M66 112 q34 22 68 0 l-6 14 q-28 16 -56 0 Z" fill="${a}"/>
-          <path d="M108 120 l18 30 l-12 4 l-12 -28 Z" fill="${dark}"/>
+          <path d="M64 114 Q100 140 136 114 L129 130 Q100 150 71 130 Z" fill="${a}"/>
+          <path d="M110 124 L128 156 L114 160 L104 130 Z" fill="${dark}"/>
         </g>`;
     }
     if (dna.accessory === "bow") {
       return `
-        <g transform="translate(100 118)">
-          <path d="M0 0 L-18 -10 L-18 10 Z" fill="${a}"/>
-          <path d="M0 0 L18 -10 L18 10 Z" fill="${a}"/>
-          <circle cx="0" cy="0" r="5" fill="${dark}"/>
+        <g transform="translate(100 122)">
+          <path d="M0 0 Q-20 -12 -20 0 Q-20 12 0 0 Z" fill="${a}"/>
+          <path d="M0 0 Q20 -12 20 0 Q20 12 0 0 Z" fill="${a}"/>
+          <circle cx="0" cy="0" r="5.5" fill="${dark}"/>
         </g>`;
     }
     return "";
@@ -250,32 +245,40 @@
   // ---- compose -------------------------------------------------------------
   function renderSVG(dna, opts) {
     const d = normalize(dna);
-    const c = d.coat;
+    const g = `p${uid++}`;
     const options = opts || {};
     const cls = options.className ? ` class="${options.className}"` : "";
-    // z-order: tail → body → ears → head → face → accessory
+    const coat = d.coat, patch = d.patch;
+    const defs = `<defs>
+      <radialGradient id="${g}-coat" cx="42%" cy="28%" r="82%">
+        <stop offset="0%" stop-color="${shade(coat, 0.22)}"/>
+        <stop offset="58%" stop-color="${coat}"/>
+        <stop offset="100%" stop-color="${shade(coat, -0.13)}"/>
+      </radialGradient>
+      <radialGradient id="${g}-patch" cx="50%" cy="30%" r="80%">
+        <stop offset="0%" stop-color="${shade(patch, 0.12)}"/>
+        <stop offset="100%" stop-color="${patch}"/>
+      </radialGradient>
+      <radialGradient id="${g}-eye" cx="46%" cy="32%" r="72%">
+        <stop offset="0%" stop-color="#7a5540"/>
+        <stop offset="100%" stop-color="#2a1d16"/>
+      </radialGradient>
+    </defs>`;
+    // z-order: tail → body → accessory → ears → head → face
     return `<svg${cls} viewBox="0 0 200 210" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-  ${tailSVG(d, c)}
-  ${bodySVG(d, c)}
+  ${defs}
+  ${tailSVG(d, g)}
+  ${bodySVG(d, g)}
   ${accessorySVG(d)}
-  ${earsSVG(d, c)}
-  ${headSVG(d, c)}
-  ${muzzleSVG(d)}
-  ${eyesSVG(d)}
+  ${earsSVG(d, g)}
+  ${headSVG(d, g)}
+  ${muzzleSVG(d, g)}
+  ${eyesSVG(d, g)}
   ${blushSVG(d)}
 </svg>`;
   }
 
-  const api = {
-    renderSVG,
-    normalize,
-    defaults,
-    OPTIONS,
-    COAT_PALETTE,
-    ACCENT_PALETTE,
-    shade,
-  };
-
+  const api = { renderSVG, normalize, defaults, OPTIONS, COAT_PALETTE, ACCENT_PALETTE, shade };
   root.PixllKit = api;
   if (typeof module !== "undefined" && module.exports) module.exports = api;
 })(typeof window !== "undefined" ? window : globalThis);
