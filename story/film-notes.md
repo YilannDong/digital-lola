@@ -17,6 +17,7 @@ Capture these before you edit — tick as you go:
 - [ ] **Open/close** — click menu-bar 🐶 (pops in) and × (tucks away). Do it twice, crisp.
 - [ ] **The tap** — click desktop-Lola → her bounce + "hi!" speech bubble.
 - [ ] **Side-by-side ender** — real Lola + desktop-Lola in one frame.
+- [ ] **GitHub link on screen** — your handle / repo URL for the CTA ("she's free on GitHub").
 
 ## Editing recipe
 
@@ -40,10 +41,10 @@ Capture these before you edit — tick as you go:
 **Caption:**
 
 > Meet Meta-Lola 🐶 — my real dog, but on my screen while I work.
-> I made her look on Uchinoko Maker, then built the desktop companion by *directing* Claude Code — I made the calls, the AI wrote the code.
-> This is Tool 1 of 100 I'm building through vibe coding. Follow along 💛
+> I crafted her look on Uchinoko Maker (silhouette, face, the cutest bandana), then took her to Claude Code and said "build me this" — I directed, the AI wrote the code.
+> She's Tool 1 of 100 I'm building through vibe coding — and she's **free on GitHub**, link in bio. 💛
 >
-> What would *your* desktop pet be?
+> Want your own Lola? Go grab her. What would *your* desktop pet be?
 
 **Hashtags:**
 

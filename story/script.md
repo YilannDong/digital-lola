@@ -1,7 +1,7 @@
 # 🐶 Meta-Lola — 60-Second Reel
 
 **Series:** Building 100 Tools with Vibe Coding · **Tool 01 / 100**
-**Runtime:** 0:60 · ~150 words VO · 9:16 vertical · captions burned in (mute-first)
+**Runtime:** 0:60 · ~154 words VO · 9:16 vertical · captions burned in (mute-first)
 
 ---
 
@@ -18,24 +18,24 @@
 - **VO:** "I'm a product designer — I'm on a screen all day. That's a lot of time *not* looking at her. So I built a little Lola who lives on my screen too."
 
 **[0:11–0:22 · THE SPARK]**
-- **Shot:** Screen-rec of Uchinoko Maker — assembling Lola: body, face, a little bandana.
-- **On-screen:** *I built her look on Uchinoko — part by part*
-- **VO:** "First I made her look on a site called Uchinoko Maker — you assemble a pet piece by piece: body, face, a little bandana. And there she was… *my* Lola."
+- **Shot:** Screen-rec of Uchinoko Maker — picking her silhouette, her face, the cutest little bandana.
+- **On-screen:** *craft your own furry child 🐾*
+- **VO:** "I made her on Uchinoko Maker — the cutest little studio. You pick a silhouette, her face, the perfect bandana… and craft your own furry child. And there she was: *my* Lola."
 
 **[0:22–0:40 · ⚙️ THE BUILD]**
-- **Shot:** Drag Lola's Uchinoko image into Claude Code → it redraws as clean vector art. Then you typing her lines.
-- **On-screen:** *"I directed. The AI wrote the code."* → flash: *① image → SVG · ② her voice · ③ one-click open + close*
-- **VO:** "Then I brought her picture into Claude Code, and it turned Lola into crisp *vector art*. From there I directed the rest — how she talks, the little things she says, and how she pops onto my desktop and tucks away with one click."
+- **Shot:** Drop Lola's Uchinoko image into Claude Code → she becomes a real app. Quick cuts of you typing → the pet floating.
+- **On-screen:** *"I directed. The AI wrote the code."*
+- **VO:** "Then I took her to Claude Code and just said: build me this. I directed, the AI wrote the code — and Lola became a real little app that floats on my desktop."
 
 **[0:40–0:52 · 🥹 PAYOFF]**
-- **Shot:** Click the menu-bar 🐶 → Lola pops in; click × → she tucks away. Then tap her → bounce + "hi!" bubble.
-- **On-screen:** *one click in. one click away.*
-- **VO:** "Now she's always in my corner — one tap and she's here, another and she's gone. I tap her, she bounces and says hi. My *real* daughter's still the priority, though. Hehe."
+- **Shot:** Tap desktop-Lola → she bounces + "hi!" bubble. Click 🐶 to bring her out, × to tuck her away.
+- **On-screen:** *one click in · one click away*
+- **VO:** "I tap her, she bounces and says hi. One click brings her out, one tucks her away. My *real* daughter's still the priority, though. Hehe."
 
 **[0:52–0:60 · 📣 CTA]**
-- **Shot:** Desktop-Lola + real-Lola side by side; series badge animates in.
-- **On-screen:** *Tool 1 of 100 · Vibe Coding* + *Follow the series 💛*
-- **VO:** "This is Tool 1 of 100 I'm building through vibe coding. Follow along. 💛"
+- **Shot:** Desktop-Lola + real-Lola side by side; the GitHub link / your handle animates on screen with the series badge.
+- **On-screen:** *Tool 1 of 100 · Vibe Coding* + *🐶 Lola's free on GitHub — link below*
+- **VO:** "This is Tool 1 of 100 through vibe coding. Want your own Lola? She's free on GitHub — link below. Follow along. 💛"
 
 ---
 
@@ -45,13 +45,13 @@
 >
 > I'm a product designer — I'm on a screen all day. That's a lot of time not looking at her. So I built a little Lola who lives on my screen too.
 >
-> First I made her look on a site called Uchinoko Maker — you assemble a pet piece by piece: body, face, a little bandana. And there she was… my Lola.
+> I made her on Uchinoko Maker — the cutest little studio. You pick a silhouette, her face, the perfect bandana… and craft your own furry child. And there she was: my Lola.
 >
-> Then I brought her picture into Claude Code, and it turned Lola into crisp vector art. From there I directed the rest — how she talks, the little things she says, and how she pops onto my desktop and tucks away with one click.
+> Then I took her to Claude Code and just said: build me this. I directed, the AI wrote the code — and Lola became a real little app that floats on my desktop.
 >
-> Now she's always in my corner — one tap and she's here, another and she's gone. I tap her, she bounces and says hi. My real daughter's still the priority, though. Hehe.
+> I tap her, she bounces and says hi. One click brings her out, one tucks her away. My real daughter's still the priority, though. Hehe.
 >
-> This is Tool 1 of 100 I'm building through vibe coding. Follow along. 💛
+> This is Tool 1 of 100 through vibe coding. Want your own Lola? She's free on GitHub — link below. Follow along. 💛
 
 ---
 
